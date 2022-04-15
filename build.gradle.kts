@@ -78,7 +78,6 @@ tasks.named("publish") {
 }
 
 if (project.ext.has("mavenToken")) {
-    println(project.ext["mavenToken"])
     publishing {
         repositories {
             maven {
