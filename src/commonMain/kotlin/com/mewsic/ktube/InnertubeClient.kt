@@ -1,0 +1,78 @@
+package com.mewsic.ktube
+
+import com.mewsic.ktube.enums.Client
+import com.mewsic.ktube.enums.GoogleHeader
+import com.mewsic.ktube.enums.Host
+import com.mewsic.ktube.internal.Models
+import com.mewsic.ktube.internal.models.ClientSchema
+import com.mewsic.ktube.internal.models.Locale
+import com.mewsic.ktube.internal.session.InnertubeSession
+import com.mewsic.ktube.payloads.request.*
+import com.mewsic.ktube.payloads.response.ConfigResponse
+import com.mewsic.ktube.payloads.response.GuideResponse
+import io.ktor.client.request.*
+
+class InnertubeClient(val client: Client = Client.WEB_REMIX, locale: Locale? = null) {
+    val session = InnertubeSession(Models.apis[Host.YOUTUBEI]!!, info, locale)
+
+    val schema: ClientSchema
+        get() {
+            return Models.schemas.first { it.client == client }
+        }
+
+    private val info: com.mewsic.ktube.internal.models.Client
+        get() = Models.clients[client]!!
+
+    suspend fun config() : ConfigResponse {
+        return configJson().interpret()
+    }
+
+    private suspend fun configJson(): JsonParser {
+        return session.postJson("config") {
+            setBody(EmptyPayload(ContextPayload(info)))
+        }.also {
+            if (!it.has("error")) {
+                session.extraHeaders[GoogleHeader.VISITOR_ID.toString()] =
+                    it["responseContext"].get<String>("visitorData")
+            }
+        }
+    }
+
+    suspend fun guide() : GuideResponse {
+        return guideJson().interpret()
+    }
+
+    private suspend fun guideJson(): JsonParser {
+        return session.postJson("guide") {
+            setBody(EmptyPayload(ContextPayload(info)))
+        }
+    }
+
+    suspend fun searchJson(query: String) : JsonParser {
+        return session.postJson("search") {
+            setBody(SearchPayload(query, ContextPayload(info)))
+        }
+    }
+
+    suspend fun playerJson(videoId: String) : JsonParser {
+        return session.postJson("player") {
+            setBody(PlayerPayload(videoId, ContextPayload(info)))
+        }
+    }
+
+    suspend fun browseJson(browseId: String, params: String? = null, continuation: String? = null) : JsonParser {
+        return session.postJson("browse") {
+            continuation?.let {
+                parameter("continuation", it)
+                parameter("ctoken", it)
+            }
+            setBody(BrowsePayload(browseId, params, ContextPayload(info)))
+        }
+    }
+
+    suspend fun nextJson(videoId: String, playlistId: String, params: String? = null, index: Int? = null, continuation: String? = null) : JsonParser {
+        return session.postJson("next") {
+            setBody(NextPayload(videoId, playlistId, params, index, continuation, ContextPayload(info)))
+        }
+    }
+}
