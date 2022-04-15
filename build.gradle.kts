@@ -2,10 +2,11 @@ plugins {
     kotlin("multiplatform")
     id("com.android.library")
     kotlin("plugin.serialization") version "1.6.10"
+    `maven-publish`
 }
 
 group = "com.mewsic"
-version = "1.0"
+version = "1.0.0-beta1"
 
 kotlin {
     android()
@@ -44,5 +45,44 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
+    }
+}
+
+
+if (project.ext.has("mavenToken")) {
+    publishing {
+        repositories {
+            maven {
+                name = "Host"
+                url = uri("https://maven.martmists.com/releases")
+                credentials {
+                    username = "admin"
+                    password = project.ext["mavenToken"]!! as String
+                }
+            }
+        }
+
+        publications.withType<MavenPublication> {
+
+        }
+    }
+} else if (System.getenv("CI") == "true") {
+    publishing {
+        repositories {
+            maven {
+                name = "Host"
+                url = uri(System.getenv("GITHUB_TARGET_REPO")!!)
+                credentials {
+                    username = "github-actions"
+                    password = System.getenv("DEPLOY_KEY")!!
+                }
+            }
+        }
+
+        publications.withType<MavenPublication> {
+            if (System.getenv("DEPLOY_TYPE") == "snapshot") {
+                version = System.getenv("GITHUB_SHA")!!
+            }
+        }
     }
 }
