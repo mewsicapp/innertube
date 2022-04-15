@@ -7,9 +7,9 @@ import com.mewsic.innertube.internal.Models
 import com.mewsic.innertube.internal.models.Api
 import com.mewsic.innertube.internal.models.Client
 import com.mewsic.innertube.internal.models.Locale
+import com.mewsic.innertube.platform.getHttpClient
 import io.ktor.client.*
 import io.ktor.client.call.*
-import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
@@ -17,14 +17,13 @@ import io.ktor.client.statement.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.json.Json
-import java.io.File
 import kotlin.math.min
 
 class InnertubeSession(private val baseUrl: Api = Models.apis[Host.YOUTUBEI]!!, @PublishedApi internal val client: Client, private val locale: Locale? = null) {
     val extraHeaders = mutableMapOf<String, String>()
 
     @PublishedApi
-    internal val apiHttpClient = HttpClient(CIO) {
+    internal val apiHttpClient = getHttpClient {
         install(DefaultRequest) {
             url(baseUrl.toString())
             client.headers(headers, locale)
@@ -74,7 +73,7 @@ class InnertubeSession(private val baseUrl: Api = Models.apis[Host.YOUTUBEI]!!, 
         }
     }
 
-    suspend inline fun <reified T> post(path: String, builder: HttpRequestBuilder.() -> Unit = {}) : T {
+    suspend fun post(path: String, builder: HttpRequestBuilder.() -> Unit = {}) : JsonParser {
         val json = apiHttpClient.post(path) {
             builder()
             parameter("key", client.client.key)
@@ -83,31 +82,6 @@ class InnertubeSession(private val baseUrl: Api = Models.apis[Host.YOUTUBEI]!!, 
                 header(it.key, it.value)
             }
         }.bodyAsText()
-
-        File("out.json").writeText(json)
-
-        return apiHttpClient.post(path) {
-            builder()
-            parameter("key", client.client.key)
-            parameter("alt", Alt.JSON.toString())
-            extraHeaders.forEach {
-                header(it.key, it.value)
-            }
-        }.body()
-    }
-
-    suspend fun postJson(path: String, builder: HttpRequestBuilder.() -> Unit = {}) : JsonParser {
-        val json = apiHttpClient.post(path) {
-            builder()
-            parameter("key", client.client.key)
-            parameter("alt", Alt.JSON.toString())
-            extraHeaders.forEach {
-                header(it.key, it.value)
-            }
-        }.bodyAsText()
-
-        // TODO: Remove when we know most outputs
-        File("out.json").writeText(json)
         return JsonParser(json)
     }
 }

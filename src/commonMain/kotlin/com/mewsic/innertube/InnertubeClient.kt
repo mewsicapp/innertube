@@ -8,8 +8,6 @@ import com.mewsic.innertube.internal.models.ClientSchema
 import com.mewsic.innertube.internal.models.Locale
 import com.mewsic.innertube.internal.session.InnertubeSession
 import com.mewsic.innertube.payloads.request.*
-import com.mewsic.innertube.payloads.response.ConfigResponse
-import com.mewsic.innertube.payloads.response.GuideResponse
 import io.ktor.client.request.*
 
 class InnertubeClient(val client: Client = Client.ANDROID_MUSIC, locale: Locale? = null) {
@@ -22,13 +20,10 @@ class InnertubeClient(val client: Client = Client.ANDROID_MUSIC, locale: Locale?
 
     private val info: com.mewsic.innertube.internal.models.Client
         get() = Models.clients[client]!!
+    
 
-    suspend fun config() : ConfigResponse {
-        return configJson().interpret()
-    }
-
-    private suspend fun configJson(): JsonParser {
-        return session.postJson("config") {
+    private suspend fun config(): JsonParser {
+        return session.post("config") {
             setBody(EmptyPayload(ContextPayload(info)))
         }.also {
             if (!it.has("error")) {
@@ -38,30 +33,26 @@ class InnertubeClient(val client: Client = Client.ANDROID_MUSIC, locale: Locale?
         }
     }
 
-    suspend fun guide() : GuideResponse {
-        return guideJson().interpret()
-    }
-
-    private suspend fun guideJson(): JsonParser {
-        return session.postJson("guide") {
+    private suspend fun guide(): JsonParser {
+        return session.post("guide") {
             setBody(EmptyPayload(ContextPayload(info)))
         }
     }
 
-    suspend fun searchJson(query: String) : JsonParser {
-        return session.postJson("search") {
+    suspend fun search(query: String) : JsonParser {
+        return session.post("search") {
             setBody(SearchPayload(query, ContextPayload(info)))
         }
     }
 
-    suspend fun playerJson(videoId: String) : JsonParser {
-        return session.postJson("player") {
+    suspend fun player(videoId: String) : JsonParser {
+        return session.post("player") {
             setBody(PlayerPayload(videoId, ContextPayload(info)))
         }
     }
 
-    suspend fun browseJson(browseId: String, params: String? = null, continuation: String? = null) : JsonParser {
-        return session.postJson("browse") {
+    suspend fun browse(browseId: String, params: String? = null, continuation: String? = null) : JsonParser {
+        return session.post("browse") {
             continuation?.let {
                 parameter("continuation", it)
                 parameter("ctoken", it)
@@ -70,8 +61,8 @@ class InnertubeClient(val client: Client = Client.ANDROID_MUSIC, locale: Locale?
         }
     }
 
-    suspend fun nextJson(videoId: String, playlistId: String, params: String? = null, index: Int? = null, continuation: String? = null) : JsonParser {
-        return session.postJson("next") {
+    suspend fun next(videoId: String, playlistId: String, params: String? = null, index: Int? = null, continuation: String? = null) : JsonParser {
+        return session.post("next") {
             setBody(NextPayload(videoId, playlistId, params, index, continuation, ContextPayload(info)))
         }
     }

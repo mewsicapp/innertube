@@ -1,7 +1,5 @@
 package com.mewsic.innertube.enums
 
-import java.util.*
-
 enum class Domain {
     GOOGLE,
     GOOGLE_APIS,
@@ -9,7 +7,7 @@ enum class Domain {
     YOUTUBE_KIDS;
 
     override fun toString(): String {
-        return name.lowercase(Locale.getDefault()).replace("_", "") + ".com"
+        return name.lowercase().replace("_", "") + ".com"
     }
 
     fun reverse(): String {

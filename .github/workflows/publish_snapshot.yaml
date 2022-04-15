@@ -1,13 +1,13 @@
-name: Publish Release
+name: Publish Snapshot
 
 on:
     push:
-        tags:
-            - '*'
+        branches:
+            - meow
 
 env:
-    GITHUB_TARGET_REPO: "https://maven.martmists.com/releases"
-    DEPLOY_TYPE: "release"
+    GITHUB_TARGET_REPO: "https://maven.martmists.com/snapshots"
+    DEPLOY_TYPE: "snapshot"
     DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
 
 jobs:

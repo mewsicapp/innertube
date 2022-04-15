@@ -1,16 +1,29 @@
 plugins {
-    kotlin("multiplatform")
-    id("com.android.library")
+    kotlin("multiplatform") version "1.6.10"
+    id("com.android.library") version "7.0.3"
     kotlin("plugin.serialization") version "1.6.10"
     `maven-publish`
+    id("com.github.ben-manes.versions") version "0.42.0"
+    id("se.patrikerdes.use-latest-versions") version "0.2.18"
 }
 
 group = "com.mewsic"
 version = "1.0.0"
 
+repositories {
+    mavenCentral()
+    google()
+}
+
 kotlin {
-    android()
-    jvm("desktop") {
+    android {
+        publishLibraryVariants("release")
+    }
+    js(IR) {
+        browser()
+        nodejs()
+    }
+    jvm {
         compilations.all {
             kotlinOptions.jvmTarget = "11"
         }
@@ -19,7 +32,6 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 api("io.ktor:ktor-client-core:2.0.0")
-                api("io.ktor:ktor-client-cio:2.0.0")
                 api("io.ktor:ktor-client-content-negotiation:2.0.0")
                 api("io.ktor:ktor-serialization-kotlinx-json:2.0.0")
                 api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
@@ -30,6 +42,19 @@ kotlin {
         val androidMain by getting {
             dependencies {
                 api("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1")
+                api("io.ktor:ktor-client-cio:2.0.0")
+            }
+        }
+
+        val jvmMain by getting {
+            dependencies {
+                api("io.ktor:ktor-client-cio:2.0.0")
+            }
+        }
+
+        val jsMain by getting {
+            dependencies {
+                api("io.ktor:ktor-client-js:2.0.0")
             }
         }
     }
@@ -48,15 +73,19 @@ android {
     }
 }
 
+tasks.named("publish") {
+    dependsOn("build")
+}
 
 if (project.ext.has("mavenToken")) {
+    println(project.ext["mavenToken"])
     publishing {
         repositories {
             maven {
                 name = "Host"
                 url = uri("https://maven.martmists.com/releases")
                 credentials {
-                    username = "admin"
+                    username = "mewsic"
                     password = project.ext["mavenToken"]!! as String
                 }
             }
@@ -73,7 +102,7 @@ if (project.ext.has("mavenToken")) {
                 name = "Host"
                 url = uri(System.getenv("GITHUB_TARGET_REPO")!!)
                 credentials {
-                    username = "github-actions"
+                    username = "mewsic"
                     password = System.getenv("DEPLOY_KEY")!!
                 }
             }

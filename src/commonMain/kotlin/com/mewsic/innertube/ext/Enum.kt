@@ -1,9 +1,7 @@
 package com.mewsic.innertube.ext
 
-import java.util.*
-
 private fun String.capitalizeFirstLetter(): String {
-    return lowercase().replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+    return lowercase().replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
 }
 
 fun Enum<*>.toTitleCase(): String {
