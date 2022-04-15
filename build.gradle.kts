@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.mewsic"
-version = "1.0.0-beta1"
+version = "1.0.0"
 
 kotlin {
     android()
