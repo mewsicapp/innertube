@@ -12,7 +12,7 @@ import com.mewsic.innertube.payloads.response.ConfigResponse
 import com.mewsic.innertube.payloads.response.GuideResponse
 import io.ktor.client.request.*
 
-class InnertubeClient(val client: Client = Client.WEB_REMIX, locale: Locale? = null) {
+class InnertubeClient(val client: Client = Client.ANDROID_MUSIC, locale: Locale? = null) {
     val session = InnertubeSession(Models.apis[Host.YOUTUBEI]!!, info, locale)
 
     val schema: ClientSchema
