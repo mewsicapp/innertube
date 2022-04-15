@@ -22,7 +22,7 @@ class InnertubeClient(val client: Client = Client.ANDROID_MUSIC, locale: Locale?
         get() = Models.clients[client]!!
     
 
-    private suspend fun config(): JsonParser {
+    suspend fun config(): JsonParser {
         return session.post("config") {
             setBody(EmptyPayload(ContextPayload(info)))
         }.also {
@@ -33,7 +33,7 @@ class InnertubeClient(val client: Client = Client.ANDROID_MUSIC, locale: Locale?
         }
     }
 
-    private suspend fun guide(): JsonParser {
+    suspend fun guide(): JsonParser {
         return session.post("guide") {
             setBody(EmptyPayload(ContextPayload(info)))
         }
