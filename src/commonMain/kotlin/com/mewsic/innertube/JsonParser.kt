@@ -36,6 +36,9 @@ class JsonParser {
     inline fun <reified T> get(key: String) : T {
         return deserializer.decodeFromJsonElement(element.jsonObject[key]!!)
     }
+    inline fun <reified T> getValue(key: String) : T {
+        return deserializer.decodeFromJsonElement(element.jsonObject[key]!!)
+    }
 
     fun toList() : List<JsonParser> {
         return element.jsonArray.map { JsonParser(it) }
